@@ -1,6 +1,8 @@
 package br.clayder.catalog.admin.domain.category
 
 import br.clayder.catalog.admin.domain.AggregateRoot
+import br.clayder.catalog.admin.domain.validation.CategoryValidator
+import br.clayder.catalog.admin.domain.validation.ValidationHandler
 import java.time.Instant
 
 class Category private constructor(
@@ -34,6 +36,10 @@ class Category private constructor(
                 aUpdatedAt = now
             )
         }
+    }
+
+    override fun validate(handle: ValidationHandler) {
+        CategoryValidator(this, handle).validate()
     }
 
 }
