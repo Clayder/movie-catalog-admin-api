@@ -7,7 +7,7 @@ import br.clayder.catalog.admin.domain.validation.ValidationHandler
 class ThrowsValidationHandler: ValidationHandler  {
 
     override fun append(anError: Error): ValidationHandler {
-        throw DomainException.with(listOf(anError))
+        throw DomainException.with(anError)
     }
 
     override fun append(anHandler: ValidationHandler): ValidationHandler {
@@ -19,7 +19,7 @@ class ThrowsValidationHandler: ValidationHandler  {
             aValidation.validate()
         } catch (ex: Exception) {
             throw DomainException.with(
-                listOf(Error(ex.message.toString()))
+                Error(ex.message.toString())
             )
         }
 
