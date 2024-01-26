@@ -3,7 +3,7 @@ package br.clayder.catalog.admin.domain.category
 import br.clayder.catalog.admin.domain.exceptions.DomainException
 import br.clayder.catalog.admin.domain.validation.handler.ThrowsValidationHandler
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
@@ -17,8 +17,7 @@ class CategoryTest {
 
         val actualCategory = Category.newCategory(
             expectedName,
-            expectedDescription,
-            expectedIsActive
+            expectedDescription
         )
 
         assertDoesNotThrow { actualCategory.validate(ThrowsValidationHandler()) }
@@ -43,8 +42,7 @@ class CategoryTest {
 
         val actualCategory = Category.newCategory(
             expectedName,
-            expectedDescription,
-            expectedIsActive
+            expectedDescription
         )
 
         val actualException = assertThrows(
@@ -69,8 +67,7 @@ class CategoryTest {
 
         val actualCategory = Category.newCategory(
             expectedName,
-            expectedDescription,
-            expectedIsActive
+            expectedDescription
         )
 
         val actualException = assertThrows(
@@ -97,8 +94,7 @@ class CategoryTest {
 
         val actualCategory = Category.newCategory(
             expectedName,
-            expectedDescription,
-            expectedIsActive
+            expectedDescription
         )
 
         val actualException = assertThrows(
@@ -121,8 +117,7 @@ class CategoryTest {
 
         val actualCategory = Category.newCategory(
             expectedName,
-            expectedDescription,
-            expectedIsActive
+            expectedDescription
         )
 
         assertDoesNotThrow { actualCategory.validate(ThrowsValidationHandler()) }
@@ -143,10 +138,9 @@ class CategoryTest {
         val expectedDescription = "Test"
         val expectedIsActive = false
 
-        val actualCategory = Category.newCategory(
+        val actualCategory = Category.newDeactivateCategory(
             expectedName,
-            expectedDescription,
-            expectedIsActive
+            expectedDescription
         )
 
         assertDoesNotThrow { actualCategory.validate(ThrowsValidationHandler()) }
@@ -158,6 +152,65 @@ class CategoryTest {
         Assertions.assertFalse(actualCategory.isActive)
         Assertions.assertNotNull(actualCategory.aCreatedAt)
         Assertions.assertNotNull(actualCategory.aUpdatedAt)
+        Assertions.assertNotNull(actualCategory.aDeletedAt)
+    }
+
+    @Test
+    fun `Given a valid active category when call deactivate then return category inactivated`() {
+        val expectedName = "Filmes"
+        val expectedDescription = "A categoria mais assistida"
+        val expectedIsActive = false
+
+        val aCategory = Category.newCategory(
+            expectedName,
+            expectedDescription
+        )
+
+        val updatedAt = aCategory.aUpdatedAt
+
+        assertTrue(aCategory.isActive)
+        assertNull(aCategory.aDeletedAt)
+
+        val actualCategory = aCategory.deactivate()
+
+        assertDoesNotThrow { actualCategory.validate(ThrowsValidationHandler()) }
+
+        Assertions.assertEquals(aCategory.anId, actualCategory.anId)
+        Assertions.assertEquals(expectedName, actualCategory.aName)
+        Assertions.assertEquals(expectedDescription, actualCategory.aDescription)
+        Assertions.assertEquals(expectedIsActive, actualCategory.isActive)
+        Assertions.assertNotNull(actualCategory.aCreatedAt)
+        Assertions.assertNotNull(actualCategory.aUpdatedAt.isAfter(updatedAt))
+        Assertions.assertNotNull(actualCategory.aDeletedAt)
+    }
+
+    @Test
+    fun `Given a valid inactive category when call activate then return category activated`() {
+        val expectedName = "Filmes"
+        val expectedDescription = "A categoria mais assistida"
+        val expectedIsActive = true
+
+        val aCategory = Category.newDeactivateCategory(
+            expectedName,
+            expectedDescription
+        )
+
+        val updatedAt = aCategory.aUpdatedAt
+        val createdAt = aCategory.aCreatedAt
+
+        assertFalse(aCategory.isActive)
+        assertNotNull(aCategory.aDeletedAt)
+
+        val actualCategory = aCategory.activate()
+
+        assertDoesNotThrow { actualCategory.validate(ThrowsValidationHandler()) }
+
+        Assertions.assertEquals(aCategory.anId, actualCategory.anId)
+        Assertions.assertEquals(expectedName, actualCategory.aName)
+        Assertions.assertEquals(expectedDescription, actualCategory.aDescription)
+        Assertions.assertEquals(expectedIsActive, actualCategory.isActive)
+        Assertions.assertEquals(createdAt, actualCategory.aCreatedAt)
+        Assertions.assertNotNull(actualCategory.aUpdatedAt.isAfter(updatedAt))
         Assertions.assertNull(actualCategory.aDeletedAt)
     }
 }
