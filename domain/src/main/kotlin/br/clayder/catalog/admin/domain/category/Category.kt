@@ -8,14 +8,21 @@ import java.time.Instant
 class Category private constructor(
 
     val anId: CategoryID = CategoryID.unique() ,
-    val aName: String,
-    val aDescription: String
+    private val aName: String,
+    private val aDescription: String,
+    private val active: Boolean,
 
 ): AggregateRoot<CategoryID>(anId) {
 
+    var name: String = aName
+        private set
+
+    var description: String = aDescription
+        private set
+
     var aDeletedAt: Instant? = null
         private set
-    var isActive: Boolean = true
+    var isActive: Boolean = active
         private set
 
     var aUpdatedAt: Instant = Instant.now()
@@ -27,29 +34,22 @@ class Category private constructor(
     companion object {
         fun newCategory(
             aName: String,
-            aDescription: String
+            aDescription: String,
+            isActive: Boolean = true
         ): Category {
 
             return Category(
                 aName = aName,
                 aDescription = aDescription,
+                active = isActive
             )
         }
 
-        fun newDeactivateCategory(
-            aName: String,
-            aDescription: String
-        ): Category {
-            return newCategory(aName, aDescription).deactivate()
-        }
     }
 
     fun deactivate(): Category {
 
-        if(aDeletedAt == null) {
-            aDeletedAt = Instant.now()
-        }
-
+        aDeletedAt = aDeletedAt ?: Instant.now()
         isActive = false
         aUpdatedAt = Instant.now()
 
@@ -65,8 +65,27 @@ class Category private constructor(
         return this
     }
 
+    fun update(
+        aName: String,
+        aDescription: String,
+        isActive: Boolean
+    ): Category {
+
+        when(isActive) {
+            true -> activate()
+            false -> deactivate()
+        }
+
+        this.name = aName
+        this.description = aDescription
+
+        return this
+    }
+
     override fun validate(handle: ValidationHandler) {
         CategoryValidator(this, handle).validate()
     }
+
+
 
 }
